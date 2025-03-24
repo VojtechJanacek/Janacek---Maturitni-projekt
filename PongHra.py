@@ -6,7 +6,7 @@ smer = 1
 
 pygame.init()
 
-# Nastavení rychlostí qwe qwe qwe qwe qwe qwe qwe qwe 
+# Nastavení rychlostí 
 mic_speed_x = 8
 mic_speed_y = 8
 cpu_speed = 8
@@ -64,12 +64,14 @@ def kolize_mice():
     if mic.right >= sirka_okna:
         cpu_points += 1
         mic_restart()
+        stredova_platforma.center = (sirka_okna / 2, vyska_okna/1.1)
 
     # Kolize s levým okrajem (bod pro hráče)
     if mic.left <= 0:
         hrac_points += 1
         mic_restart()
-
+        stredova_platforma.center = (sirka_okna / 2, vyska_okna/1.1)
+        
     # Kolize s hráčem
     if mic.colliderect(hrac):
         mic_speed_x *= -1
