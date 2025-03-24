@@ -1,0 +1,77 @@
+Zde je podrobný popis kódu pro vaši Pygame implementaci hry Pong:
+Popisky k implementaci hry Pong s power-upy
+Základní nastavení a inicializace
+
+Inicializace Pygame a základních proměnných pro rychlost a skóre
+Vytvoření fontů pro zobrazení textu a skóre
+Připojení k SQLite databázi pro ukládání historie zápasů
+
+Třída PowerUp
+
+Definice třídy PowerUp pro správu herních vylepšení
+Každý power-up má svoji pozici, typ, barvu a vlastnosti
+Efekty power-upů trvají 5 sekund
+
+Typy power-upů
+
+zrychleni_mice: Zvýší rychlost míče (červená barva)
+zpomaleni_mice: Sníží rychlost míče (modrá barva)
+zvetseni_palky: Zvětší pálku hráče (zelená barva)
+zmenseni_palky_cpu: Zmenší pálku CPU (fialová barva)
+dvojity_bod: Další bod se počítá dvojnásobně (žlutá barva)
+neviditelny_mic: Míč se dočasně stane neviditelným (bílá barva)
+
+Funkce pro power-upy
+
+vytvor_powerup(): Vytvoří nový power-up na náhodné pozici
+aktivuj_powerup(): Aplikuje efekt power-upu a nastaví čas jeho vypršení
+kontroluj_efekty(): Kontroluje trvání efektů a resetuje nastavení po jejich vypršení
+
+Pohyb objektů
+
+pohyb_cpu(): Ovládá pohyb CPU s určitou pravděpodobností chyby (8%)
+kolize_mice(): Řeší pohyb míče, kolize s okraji, pálkami, platformou a power-upy
+pohyb_hrace(): Ovládá pohyb hráčovy pálky
+pohyb_hrace_2(): Ovládá pohyb pálky druhého hráče v režimu pro dva hráče
+pohyb_stredove_platformy(): Řídí pohyb středové překážky
+
+Bodování a restart
+
+pridat_body(): Přiděluje body s podporou dvojitého bodu
+mic_restart(): Resetuje pozici míče a jeho rychlost při novém kole
+
+Uživatelské rozhraní
+
+zobraz_menu(): Zobrazuje hlavní menu hry s různými možnostmi
+zobraz_historii(): Zobrazuje historii zápasů z databáze
+zobraz_aktivni_efekty(): Zobrazuje aktuálně aktivní power-upy a jejich zbývající čas
+
+Herní objekty
+
+Vytvoření herních objektů: míč, pálky hráčů, CPU, středová platforma
+Nastavení jejich počátečních pozic a velikostí
+
+Hlavní herní smyčka
+
+Zpracování vstupu od uživatele podle herního režimu
+Aktualizace pozic všech objektů
+Generování nových power-upů v nastaveném intervalu
+Vykreslení všech objektů a skóre
+Kontrola konce hry (při dosažení 5 bodů) a zápis výsledku do databáze
+
+Herní režimy
+
+cpu: Hra jednoho hráče proti počítači
+hrac: Hra dvou hráčů proti sobě
+historie: Zobrazení historie zápasů
+
+Funkce pro zrychlování
+
+Volitelný režim, kdy se míč a pálky postupně zrychlují po každé kolizi
+Ovládáno globální proměnnou accelerate_ball a faktorem speed_multiplier
+
+Ovládání
+
+První hráč: šipky nahoru/dolů
+Druhý hráč: klávesy W/S
+Volba menu: číselné klávesy 1-4

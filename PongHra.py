@@ -2,6 +2,7 @@ import pygame
 import sys
 import sqlite3
 import random
+import time
 smer = 1
 
 pygame.init()
@@ -29,6 +30,124 @@ CREATE TABLE IF NOT EXISTS history (
 )
 """)
 conn.commit()
+
+# Definice power-upů
+class PowerUp:
+    def __init__(self, x, y, typ, barva, velikost=20):
+        self.rect = pygame.Rect(x, y, velikost, velikost)
+        self.typ = typ
+        self.barva = barva
+        self.aktivni = True
+        self.efekt_cas = 5  # Trvání efektu v sekundách
+
+# Seznam aktivních power-upů
+aktivni_powerupy = []
+
+# Seznam aktivovaných efektů s časem expirace
+aktivni_efekty = []
+
+# Definice typů power-upů a jejich barev
+powerup_typy = {
+    "zrychleni_mice": "red",       # Zrychlí míč
+    "zpomaleni_mice": "blue",      # Zpomalí míč
+    "zvetseni_palky": "green",     # Zvětší pálku hráče
+    "zmenseni_palky_cpu": "purple", # Zmenší pálku CPU/soupeře
+    "dvojity_bod": "yellow",       # Příští bod se počítá dvakrát
+    "neviditelny_mic": "white",    # Míč se na chvíli stane neviditelným
+}
+
+# Původní velikosti objektů pro reset po vypršení efektu
+puvodni_velikost_hrace = 100
+puvodni_velikost_cpu = 100
+puvodni_rychlost_x = 8
+puvodni_rychlost_y = 8
+
+# Vytvoření nového power-upu
+def vytvor_powerup():
+    typ = random.choice(list(powerup_typy.keys()))
+    barva = powerup_typy[typ]
+    x = random.randint(100, sirka_okna - 100)
+    y = random.randint(100, vyska_okna - 100)
+    
+    # Zajistíme, aby power-up nebyl přímo na pálkách nebo na míči
+    powerup = PowerUp(x, y, typ, barva)
+    
+    # Kontrola kolize s existujícími objekty
+    while (powerup.rect.colliderect(mic) or 
+           powerup.rect.colliderect(hrac) or 
+           powerup.rect.colliderect(cpu) or 
+           powerup.rect.colliderect(stredova_platforma)):
+        x = random.randint(100, sirka_okna - 100)
+        y = random.randint(100, vyska_okna - 100)
+        powerup.rect = pygame.Rect(x, y, 20, 20)
+    
+    aktivni_powerupy.append(powerup)
+
+# Zpracování aktivace power-upu
+def aktivuj_powerup(powerup):
+    global mic_speed_x, mic_speed_y, hrac, cpu, dvojity_bod
+    
+    expiraci_cas = time.time() + powerup.efekt_cas
+    
+    if powerup.typ == "zrychleni_mice":
+        mic_speed_x *= 1.5
+        mic_speed_y *= 1.5
+        aktivni_efekty.append({"typ": "zrychleni_mice", "expiraci_cas": expiraci_cas})
+    
+    elif powerup.typ == "zpomaleni_mice":
+        mic_speed_x /= 1.5
+        mic_speed_y /= 1.5
+        aktivni_efekty.append({"typ": "zpomaleni_mice", "expiraci_cas": expiraci_cas})
+    
+    elif powerup.typ == "zvetseni_palky":
+        nova_vyska = min(200, hrac.height * 1.5)  # Omezení maximální velikosti
+        rozdil = nova_vyska - hrac.height
+        hrac.height = nova_vyska
+        hrac.y -= rozdil / 2  # Udržet středovou pozici
+        aktivni_efekty.append({"typ": "zvetseni_palky", "expiraci_cas": expiraci_cas})
+    
+    elif powerup.typ == "zmenseni_palky_cpu":
+        nova_vyska = max(30, cpu.height / 1.5)  # Omezení minimální velikosti
+        rozdil = cpu.height - nova_vyska
+        cpu.height = nova_vyska
+        cpu.y += rozdil / 2  # Udržet středovou pozici
+        aktivni_efekty.append({"typ": "zmenseni_palky_cpu", "expiraci_cas": expiraci_cas})
+    
+    elif powerup.typ == "dvojity_bod":
+        aktivni_efekty.append({"typ": "dvojity_bod", "expiraci_cas": expiraci_cas})
+    
+    elif powerup.typ == "neviditelny_mic":
+        aktivni_efekty.append({"typ": "neviditelny_mic", "expiraci_cas": expiraci_cas})
+
+# Kontrola expirace efektů
+def kontroluj_efekty():
+    global mic_speed_x, mic_speed_y, hrac, cpu, aktivni_efekty
+    
+    aktualni_cas = time.time()
+    nove_efekty = []
+    
+    for efekt in aktivni_efekty:
+        if aktualni_cas >= efekt["expiraci_cas"]:
+            # Reset efektu
+            if efekt["typ"] == "zrychleni_mice" or efekt["typ"] == "zpomaleni_mice":
+                mic_speed_x = puvodni_rychlost_x * (1 if mic_speed_x > 0 else -1)
+                mic_speed_y = puvodni_rychlost_y * (1 if mic_speed_y > 0 else -1)
+            
+            elif efekt["typ"] == "zvetseni_palky":
+                rozdil = hrac.height - puvodni_velikost_hrace
+                hrac.height = puvodni_velikost_hrace
+                hrac.y += rozdil / 2
+            
+            elif efekt["typ"] == "zmenseni_palky_cpu":
+                rozdil = puvodni_velikost_cpu - cpu.height
+                cpu.height = puvodni_velikost_cpu
+                cpu.y -= rozdil / 2
+            
+            # Ostatní efekty vyprší automaticky
+        else:
+            nove_efekty.append(efekt)
+    
+    aktivni_efekty = nove_efekty
 
 # Pohyb/animace CPU
 def pohyb_cpu():
@@ -62,16 +181,22 @@ def kolize_mice():
 
     # Kolize s pravým okrajem (bod pro CPU)
     if mic.right >= sirka_okna:
-        cpu_points += 1
+        pridat_body("cpu")
         mic_restart()
         stredova_platforma.center = (sirka_okna / 2, vyska_okna/1.1)
 
     # Kolize s levým okrajem (bod pro hráče)
     if mic.left <= 0:
-        hrac_points += 1
+        pridat_body("hrac")
         mic_restart()
         stredova_platforma.center = (sirka_okna / 2, vyska_okna/1.1)
         
+    # Kolize s power-upy
+    for powerup in list(aktivni_powerupy):
+        if mic.colliderect(powerup.rect) and powerup.aktivni:
+            aktivuj_powerup(powerup)
+            aktivni_powerupy.remove(powerup)
+            
     # Kolize s hráčem
     if mic.colliderect(hrac):
         mic_speed_x *= -1
@@ -110,8 +235,25 @@ def kolize_mice():
             mic_speed_y *= speed_multiplier
             # Zrychlení hráčů 2, pokud je režim zrychlování aktivní
             hrac_speed *= speed_multiplier
-
             hrac2_speed *= speed_multiplier  
+
+# Přidání bodů s kontrolou dvojitého bodu
+def pridat_body(hrac_typ):
+    global cpu_points, hrac_points
+    
+    body = 1
+    # Kontrola, zda je aktivní dvojitý bod
+    for efekt in aktivni_efekty:
+        if efekt["typ"] == "dvojity_bod":
+            body = 2
+            aktivni_efekty.remove(efekt)
+            break
+    
+    if hrac_typ == "cpu":
+        cpu_points += body
+    else:
+        hrac_points += body
+
 # Pohyb hráče
 def pohyb_hrace():
     if accelerate_ball:
@@ -146,7 +288,15 @@ def pohyb_stredove_platformy():
 
 # Restart míče
 def mic_restart():
-    global mic_speed_x, mic_speed_y
+    global mic_speed_x, mic_speed_y, aktivni_powerupy, aktivni_efekty
+    
+    # Reset efektů při novém kole
+    aktivni_efekty = []
+    
+    # Obnovení původních vlastností
+    hrac.height = puvodni_velikost_hrace
+    cpu.height = puvodni_velikost_cpu
+    
     mic.center = (sirka_okna / 2, vyska_okna / 2)
     mic_speed_x = 8 * (-1 if mic_speed_x > 0 else 1)
     mic_speed_y = 8 * (-1 if mic_speed_y > 0 else 1)
@@ -189,11 +339,23 @@ def zobraz_historii():
 
     pygame.display.update()
 
+# Zobrazení aktivních efektů
+def zobraz_aktivni_efekty():
+    y = 50
+    male_font = pygame.font.Font(None, 30)
+    for efekt in aktivni_efekty:
+        zbyva = round(efekt["expiraci_cas"] - time.time(), 1)
+        if zbyva > 0:
+            efekt_text = f"{efekt['typ']}: {zbyva} s"
+            efekt_surface = male_font.render(efekt_text, True, "white")
+            screen.blit(efekt_surface, (10, y))
+            y += 30
+
 # Nastavení okna
 sirka_okna = 1280
 vyska_okna = 800
 screen = pygame.display.set_mode((sirka_okna, vyska_okna))
-pygame.display.set_caption("Pong Hra")
+pygame.display.set_caption("Pong Hra s Power-Upy")
 
 # Clock
 clock = pygame.time.Clock()
@@ -227,12 +389,19 @@ line.centerx = sirka_okna / 2
 # Herní režim
 herni_rezim = None
 
+# Časovač pro tvoření power-upů
+posledni_powerup_cas = 0
+powerup_interval = 20  # Power-up každých 5 sekund
+
 # Hlavní smyčka
 while True:
     if herni_rezim is None:
         zobraz_menu()
         # Resetování skóre při návratu do menu
         cpu_points, hrac_points = 0, 0
+        # Vyčištění power-upů při návratu do menu
+        aktivni_powerupy = []
+        aktivni_efekty = []
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -290,6 +459,15 @@ while True:
                     if event.key in (pygame.K_UP, pygame.K_DOWN):
                         hrac_speed = 0
 
+        # Generování nových power-upů
+        aktualni_cas = time.time()
+        if aktualni_cas - posledni_powerup_cas > powerup_interval and len(aktivni_powerupy) < 3:
+            vytvor_powerup()
+            posledni_powerup_cas = aktualni_cas
+
+        # Kontrola a aktualizace efektů
+        kontroluj_efekty()
+
         # Pohyb CPU nebo hráče 2
         if herni_rezim == "cpu":
             pohyb_cpu()
@@ -312,7 +490,17 @@ while True:
         screen.blit(cpu_score_surface, (sirka_okna / 4, 20))
         screen.blit(hrac_score_surface, (3 * sirka_okna / 4, 20))
         pygame.draw.rect(screen, "blue", line)
-        pygame.draw.ellipse(screen, "white", mic)
+        
+        # Kreslení míče - kontrola neviditelnosti
+        neviditelny = False
+        for efekt in aktivni_efekty:
+            if efekt["typ"] == "neviditelny_mic":
+                neviditelny = True
+                break
+        
+        if not neviditelny:
+            pygame.draw.ellipse(screen, "white", mic)
+        
         if herni_rezim == "cpu":
             pygame.draw.rect(screen, "white", cpu)  # CPU platforma
             pygame.draw.rect(screen, "white", hrac)  # Hráč platforma
@@ -322,6 +510,13 @@ while True:
 
         # Kreslení středové platformy
         pygame.draw.rect(screen, "green", stredova_platforma)
+        
+        # Kreslení power-upů
+        for powerup in aktivni_powerupy:
+            pygame.draw.ellipse(screen, powerup.barva, powerup.rect)
+        
+        # Zobrazení aktivních efektů
+        zobraz_aktivni_efekty()
 
         # Aktualizace obrazovky
         pygame.display.update()
