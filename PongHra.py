@@ -6,7 +6,7 @@ smer = 1
 
 pygame.init()
 
-# Nastavení rychlostí
+# Nastavení rychlostí qwe qwe qwe qwe qwe qwe qwe qwe 
 mic_speed_x = 8
 mic_speed_y = 8
 cpu_speed = 8
