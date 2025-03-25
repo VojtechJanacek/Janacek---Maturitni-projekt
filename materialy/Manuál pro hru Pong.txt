@@ -1,0 +1,126 @@
+Manuál pro hru Pong
+
+1. Úvod
+
+Hra Pong je moderní verze klasické arkádové hry, ve které dva hráči ovládají pálky a snaží se odrážet míč tak, aby soupeř nezvládl vrátit úder. Cílem hry je získat více bodů než protihráč. Hra nabízí několik režimů, power-upy a ukládání historie zápasů.
+
+2. Instalace a spuštění
+
+Požadavky na systém
+
+Operační systém: Windows / Linux / macOS
+
+Python: Verze 3.8 a vyšší
+
+Knihovny: Pygame, SQLite3
+
+Instalace potřebných knihoven
+
+Před prvním spuštěním hry nainstalujte potřebné knihovny pomocí příkazu:
+
+pip install pygame sqlite3
+
+Spuštění hry
+
+Hru spustíte otevřením terminálu v adresáři hry a zadáním:
+
+python main.py
+
+3. Ovládání
+
+Hra se ovládá pomocí klávesnice:
+
+Hráč 1 (levá pálka):
+
+Pohyb nahoru: Šipka nahoru (↑)
+
+Pohyb dolů: Šipka dolů (↓)
+
+Hráč 2 (pravá pálka):
+
+Pohyb nahoru: W
+
+Pohyb dolů: S
+
+Menu navigace:
+
+Výběr režimu: Čísla 1-4
+
+Potvrzení výběru: Enter
+
+4. Herní režimy
+
+Hra obsahuje následující režimy:
+
+1. Hra proti CPU
+
+Hrajete proti umělé inteligenci, která se snaží vracet míč.
+
+Možnost nastavení obtížnosti CPU.
+
+2. Hra proti druhému hráči
+
+Dva hráči na jednom počítači proti sobě.
+
+Každý hráč ovládá svou pálku pomocí klávesnice.
+
+3. Zobrazení historie zápasů
+
+Uložené výsledky minulých her.
+
+Možnost smazání historie.
+
+4. Ukončení hry
+
+Stiskem tlačítka 4 v menu ukončíte hru.
+
+5. Power-upy
+
+Během hry se mohou objevit speciální power-upy, které ovlivňují hratelnost:
+
+Zrychlení míče – míč se pohybuje rychleji.
+
+Zpomalení míče – míč se zpomalí, což dává více času na reakci.
+
+Zvětšení pálky – pálka hráče se zvětší, což usnadní vracení míče.
+
+Zmenšení pálky – pálka hráče se zmenší, což zvýší obtížnost.
+
+6. Historie zápasů
+
+Hra ukládá výsledky zápasů do databáze pomocí SQLite3.
+
+Jak zobrazit historii
+
+V hlavním menu vyberte možnost 3 - Historie zápasů.
+
+Zobrazí se seznam posledních her včetně skóre.
+
+Jak smazat historii
+
+Možnost smazání všech uložených zápasů přes speciální volbu v menu.
+
+7. Nastavení a úpravy
+
+Pro pokročilé hráče je možné hru upravit podle vlastních preferencí.
+
+Úprava rychlosti míče
+
+V souboru config.py lze změnit počáteční rychlost míče:
+
+BALL_SPEED = 5  # Změňte číslo pro rychlejší/pomalejší hru
+
+Zapnutí režimu zrychlování
+
+Míč může postupně zrychlovat během hry. Aktivujete to úpravou proměnné:
+
+ACCELERATION_MODE = True  # False = vypnuto, True = zapnuto
+
+Změna velikosti hracího pole
+
+V souboru settings.py můžete změnit rozměry okna:
+
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+
+Tento manuál vám pomůže plně využít všech funkcí hry Pong. Užijte si hraní!

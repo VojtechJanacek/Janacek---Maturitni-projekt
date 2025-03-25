@@ -1,0 +1,143 @@
+Tvorba prezentace pro investora
+
+Cílem prezentace je jasně a přesvědčivě ukázat potenciál projektu a přesvědčit investory o jeho hodnotě.
+
+Struktura prezentace
+
+1. Úpvod
+
+Představení sebe a týmu (pokud existuje tým, uvést jeho role a zkušenosti).
+
+Stručně: Co je Pong a proč je zajímavý?
+
+Pong je legendární arkádová hra, která kombinuje jednoduchost s vysokou hratelností.
+
+Naše verze vylepšuje klasickou hru o moderní prvky a inovace.
+
+2. Problém & řešení
+
+Jaký problém hra řeší?
+
+Chybějí jednoduché, ale zábavné hry s větší herní hloubkou.
+
+Nostalgické retro hry zároveň oslovují novou generaci.
+
+Jaké vylepšení přináší oproti klasickému Pongu?
+
+Moderní grafika a animace.
+
+Nové herní režimy (hra proti AI, online multiplayer, power-upy).
+
+Možnost sledovat historii zápasů a výsledky.
+
+3. Herní ukázka
+
+Krátké video nebo GIF ze hry.
+
+Představení hlavních funkcí:
+
+Ovládání dvouhráče.
+
+Inteligentní AI pro singleplayer.
+
+Možnost přidávání power-upů.
+
+Dynamická změna obtížnosti.
+
+4. Cílová skupina a trh
+
+Kdo by hru hrál?
+
+Casual hráči hledající jednoduchou a zábavnou hru.
+
+Retro nadšenci a fanoušci arkádových klasik.
+
+Esport komunita (potenciálně s turnajovým režimem).
+
+Jak velký je trh pro 2D arkádové hry?
+
+Mobilní a indie hry zažívají velký boom.
+
+Roste poptávka po jednoduchých, ale kvalitních herních zážitcích.
+
+5. Byznys model
+
+Jak může hra vydělávat?
+
+Reklamy v bezplatné verzi.
+
+Premium verze bez reklam s bonusovým obsahem.
+
+Mikrotransakce (skiny, herní power-upy, upravitelné pálky a míček).
+
+Možnost rozšíření:
+
+Mobilní verze.
+
+Online turnaje s monetizací.
+
+6. Technické zázemí
+
+Jak je hra postavená?
+
+Python + Pygame pro renderování.
+
+SQLite pro ukládání statistik a historie zápasů.
+
+Možnost rozšířit na online multiplayer pomocí socketové komunikace.
+
+Jak by šla škálovat?
+
+Přidat cloudové úzložení statistik a globální žbříčky.
+
+Cross-platform podpora (PC, mobil, web).
+
+7. Plán vývoje
+
+Co už je hotové?
+
+Základní verze hry s AI a dvouhráčem.
+
+Herní menu a správa statistik.
+
+Jaké jsou další kroky?
+
+Vylepšení AI a implementace power-upů.
+
+Možnost customizace a lepší UX/UI.
+
+Časový plán dokončení:
+
+Beta verze do 3 měsíců.
+
+Finální verze do 6 měsíců.
+
+8. Požadovaná investice
+
+Kolik peněz je potřeba a na co?
+
+5000-10 000 USD na grafiku, marketing a vývojové náklady.
+
+Možné financování z crowdfundingu nebo angel investorů.
+
+Jaký je očekávaný výnos?
+
+Monetizace pomocí mikrotransakcí a premium verze.
+
+Plánovaná návratnost do 1-2 let.
+
+9. Závěr a výzva k akci
+
+Shrnutí, proč je investice zajímavá:
+
+Pong je ikonická hra s velkým tržním potenciálem.
+
+Moderní vylepšení zvýší atraktivitu pro nové i staré hráče.
+
+Plánované rozšíření zajistí dlouhodobý růst.
+
+Výzva k diskusi nebo dalším krokům:
+
+Možnost partnerství a financování.
+
+Otevřenost k diskusi o potenciálních úprava projektu dle investora.
