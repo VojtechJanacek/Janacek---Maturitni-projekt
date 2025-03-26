@@ -17,7 +17,7 @@ pygame.init()
 mic_speed_x = 8             # Horizontální rychlost míče
 mic_speed_y = 8             # Vertikální rychlost míče
 cpu_speed = 8               # Rychlost CPU hráče
-speed_multiplier = 1.1       # Faktor zrychlení míče
+speed_multiplier = 1.11       # Faktor zrychlení míče
 accelerate_ball = False      # Příznak aktivace zrychlování míče
 cpu_points, hrac_points = 0, 0  # Počítadlo bodů pro CPU a hráče
 
