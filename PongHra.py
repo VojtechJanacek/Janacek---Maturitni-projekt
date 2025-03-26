@@ -29,7 +29,7 @@ menu_font = pygame.font.Font(None, 60)    # Font pro menu
 conn = sqlite3.connect("game_history.db")
 cursor = conn.cursor()
 
-# Vytvoření tabulky pro historii zápasů, pokud ještě neexistuje
+# Vytvoření tabulky pro historii zápasů, pokud ještě neexistujes
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS history (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,7 +46,7 @@ class PowerUp:
         self.typ = typ          # Typ power-upu
         self.barva = barva      # Barva power-upu
         self.aktivni = True     # Zda je power-up aktivní
-        self.efekt_cas = 5      # Doba trvání efektu v sekundách
+        self.efekt_cas = 3      # Doba trvání efektu v sekundách
 
 # Seznamy pro správu aktivních power-upů a jejich efektů
 aktivni_powerupy = []     # Aktuálně viditelné power-upy
@@ -194,7 +194,7 @@ def kolize_mice():
     mic.x += mic_speed_x
     mic.y += mic_speed_y
 
-    # Odraz míče od horního a dolního okraje obrazovky
+    # Odraz od horního a dolního okraje obrazovky
     if mic.top <= 0 or mic.bottom >= vyska_okna:
         mic_speed_y *= -1
 
@@ -215,16 +215,45 @@ def kolize_mice():
         if mic.colliderect(powerup.rect) and powerup.aktivni:
             aktivuj_powerup(powerup)
             aktivni_powerupy.remove(powerup)
-           
-    # Odrazy míče od herních objektů s možností zrychlení
-    if mic.colliderect(hrac) or mic.colliderect(cpu):
-        mic_speed_x *= -1  # Otočení směru X
-
-    # Přidání náhodného úhlu při odrazu
-        random_angle = random.uniform(-0.5, 0.5)  # Náhodná změna úhlu v určitém rozsahu
-        mic_speed_y += random_angle * abs(mic_speed_x)
-
-
+    
+    # Odrazy míče v módu CPU
+    if herni_rezim == "cpu":
+        if mic.colliderect(hrac) or mic.colliderect(cpu):
+            mic_speed_x *= -1
+            
+            # Přidání náhodného úhlu při odrazu
+            random_angle = random.uniform(-0.5, 0.5)
+            mic_speed_y += random_angle * abs(mic_speed_x)
+            
+            if accelerate_ball:
+                mic_speed_x *= speed_multiplier
+                mic_speed_y *= speed_multiplier
+                hrac_speed *= speed_multiplier
+                cpu_speed *= speed_multiplier
+    
+    # Odrazy míče v módu multiplayer
+    if herni_rezim == "hrac":
+        if mic.colliderect(hrac):  # Odraz od pravého hráče
+            mic_speed_x *= -1
+            
+            random_angle = random.uniform(-0.5, 0.5)
+            mic_speed_y += random_angle * abs(mic_speed_x)
+            
+            if accelerate_ball:
+                mic_speed_x *= speed_multiplier
+                mic_speed_y *= speed_multiplier
+                hrac_speed *= speed_multiplier
+        
+        if mic.colliderect(hrac2):  # Odraz od levého hráče
+            mic_speed_x *= -1
+            
+            random_angle = random.uniform(-0.5, 0.5)
+            mic_speed_y += random_angle * abs(mic_speed_x)
+            
+            if accelerate_ball:
+                mic_speed_x *= speed_multiplier
+                mic_speed_y *= speed_multiplier
+                hrac2_speed *= speed_multiplier
 
     # Odraz od střední platformy
     if mic.colliderect(stredova_platforma):
@@ -234,15 +263,6 @@ def kolize_mice():
             mic_speed_y *= speed_multiplier
             hrac_speed *= speed_multiplier
             cpu_speed *= speed_multiplier
-
-    # Odraz pro druhého hráče v módu multiplayer
-    if herni_rezim == "hrac" and mic.colliderect(hrac2):
-        mic_speed_x *= -1
-        if accelerate_ball:
-            mic_speed_x *= speed_multiplier
-            mic_speed_y *= speed_multiplier
-            hrac_speed *= speed_multiplier
-            hrac2_speed *= speed_multiplier  
 
 # Funkce pro přidání bodů s možností dvojitého bodu
 def pridat_body(hrac_typ):
@@ -265,10 +285,8 @@ def pridat_body(hrac_typ):
 # Funkce pro pohyb hlavního hráče
 def pohyb_hrace():
     # Pohyb s možností zrychlení
-    if accelerate_ball:
-        hrac.y += hrac_speed * speed_multiplier
-    else:
-        hrac.y += hrac_speed
+
+    hrac.y += hrac_speed
 
     # Omezení pohybu v herním prostoru
     if hrac.top <= 0:
@@ -311,6 +329,16 @@ def mic_restart():
     mic.center = (sirka_okna / 2, vyska_okna / 2)
     mic_speed_x = 8 * (-1 if mic_speed_x > 0 else 1)
     mic_speed_y = 8 * (-1 if mic_speed_y > 0 else 1)
+    
+    # Reset pozic hráčů do středu své strany
+    if herni_rezim == "cpu":
+        # Pro CPU mód
+        hrac.centery = vyska_okna / 2
+        cpu.centery = vyska_okna / 2
+    elif herni_rezim == "hrac":
+        # Pro multiplayer mód
+        hrac.centery = vyska_okna / 2
+        hrac2.centery = vyska_okna / 2
 
 # Zobrazení hlavního menu hry
 def zobraz_menu():

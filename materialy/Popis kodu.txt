@@ -1,77 +1,149 @@
-Zde je podrobný popis kódu pro vaši Pygame implementaci hry Pong:
-Popisky k implementaci hry Pong s power-upy
-Základní nastavení a inicializace
+Detailní technický rozbor kódu Pong hry
+Inicializace a knihovny
+Import knihoven
+Skript začíná importem klíčových knihoven:
 
-Inicializace Pygame a základních proměnných pro rychlost a skóre
-Vytvoření fontů pro zobrazení textu a skóre
-Připojení k SQLite databázi pro ukládání historie zápasů
+pygame: Primární knihovna pro tvorbu her
+sys: Pro systémové operace a ukončení programu
+sqlite3: Práce s databázemi pro ukládání herní historie
+random: Generování náhodných hodnot
+time: Práce s časem a měřením intervalů
 
+Globální proměnné
+Hned po importech jsou definovány klíčové globální proměnné:
+pythonCopysmer = 1  # Směr pohybu střední platformy
+mic_speed_x = 8  # Horizontální rychlost míče
+mic_speed_y = 8  # Vertikální rychlost míče
+cpu_speed = 8  # Rychlost CPU hráče
+speed_multiplier = 10.1  # Faktor zrychlení míče
+accelerate_ball = False  # Příznak aktivace zrychlování míče
+cpu_points, hrac_points = 0, 0  # Počítadlo bodů
+Databázová vrstva
+Připojení k SQLite
+pythonCopyconn = sqlite3.connect("game_history.db")
+cursor = conn.cursor()
+
+# Vytvoření tabulky pro historii zápasů
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    player_score INTEGER,
+    cpu_score INTEGER
+)
+""")
+
+Automatické vytvoření databázové tabulky pro ukládání výsledků
+Ukládá ID zápasu, skóre hráče a CPU
+
+Implementace Power-Upů
 Třída PowerUp
+pythonCopyclass PowerUp:
+    def __init__(self, x, y, typ, barva, velikost=20):
+        self.rect = pygame.Rect(x, y, velikost, velikost)
+        self.typ = typ          # Typ power-upu
+        self.barva = barva      # Barva power-upu
+        self.aktivni = True     # Zda je power-up aktivní
+        self.efekt_cas = 5      # Doba trvání efektu v sekundách
+Typy Power-Upů
+pythonCopypowerup_typy = {
+    "zrychleni_mice": "red",       # Zrychlení míče
+    "zpomaleni_mice": "blue",      # Zpomalení míče
+    "zvetseni_palky": "green",     # Zvětšení pálky hráče
+    "zmenseni_palky_cpu": "purple",# Zmenšení pálky CPU
+    "dvojity_bod": "yellow",       # Příští bod se počítá dvakrát
+    "neviditelny_mic": "white",    # Míč se stane neviditelným
+}
+Generování Power-Upů
+Funkce vytvor_powerup():
 
-Definice třídy PowerUp pro správu herních vylepšení
-Každý power-up má svoji pozici, typ, barvu a vlastnosti
-Efekty power-upů trvají 5 sekund
+Náhodný výběr typu a barvy
+Náhodné umístění v herním prostoru
+Kontrola kolizí s herními objekty
+Přidání do seznamu aktivních power-upů
 
-Typy power-upů
+Aktivace Power-Upů
+Funkce aktivuj_powerup(powerup):
 
-zrychleni_mice: Zvýší rychlost míče (červená barva)
-zpomaleni_mice: Sníží rychlost míče (modrá barva)
-zvetseni_palky: Zvětší pálku hráče (zelená barva)
-zmenseni_palky_cpu: Zmenší pálku CPU (fialová barva)
-dvojity_bod: Další bod se počítá dvojnásobně (žlutá barva)
-neviditelny_mic: Míč se dočasně stane neviditelným (bílá barva)
+Implementuje specifické efekty pro každý typ power-upu
+Nastavuje čas expirace efektu
+Ukládá aktivní efekty do seznamu
 
-Funkce pro power-upy
+Herní Mechaniky
+Pohyb CPU
+pythonCopydef pohyb_cpu():
+    pravdepodobnost_chyby = 0.08
+    if random.random() < pravdepodobnost_chyby:
+        return  # Někdy CPU neprovede žádný pohyb
 
-vytvor_powerup(): Vytvoří nový power-up na náhodné pozici
-aktivuj_powerup(): Aplikuje efekt power-upu a nastaví čas jeho vypršení
-kontroluj_efekty(): Kontroluje trvání efektů a resetuje nastavení po jejich vypršení
+    max_cpu_speed = 8
+    rozdil = mic.centery - cpu.centery
 
-Pohyb objektů
+    # Pohyb CPU podle pozice míče s mírným zpožděním
+    if rozdil > 10:  
+        cpu.y += min(max_cpu_speed, abs(rozdil))
+    elif rozdil < -10:
+        cpu.y -= min(max_cpu_speed, abs(rozdil))
 
-pohyb_cpu(): Ovládá pohyb CPU s určitou pravděpodobností chyby (8%)
-kolize_mice(): Řeší pohyb míče, kolize s okraji, pálkami, platformou a power-upy
-pohyb_hrace(): Ovládá pohyb hráčovy pálky
-pohyb_hrace_2(): Ovládá pohyb pálky druhého hráče v režimu pro dva hráče
-pohyb_stredove_platformy(): Řídí pohyb středové překážky
+Implementace umělé inteligence pro pohyb CPU
+Náhodnost chyb pro nepředvídatelnost
+Omezení maximální rychlosti pohybu
 
-Bodování a restart
+Kolize Míče
+Funkce kolize_mice():
 
-pridat_body(): Přiděluje body s podporou dvojitého bodu
-mic_restart(): Resetuje pozici míče a jeho rychlost při novém kole
+Řeší odrazy míče od herních objektů
+Implementuje bodování
+Kontroluje kolize s power-upy
+Přidává náhodnost úhlů odrazu
+Volitelné zrychlování míče
 
-Uživatelské rozhraní
+Restart Míče
+pythonCopydef mic_restart():
+    # Reset aktivních efektů
+    aktivni_efekty = []
+    
+    # Obnovení původních velikostí
+    hrac.height = puvodni_velikost_hrace
+    cpu.height = puvodni_velikost_cpu
+    
+    # Umístění míče do středu
+    mic.center = (sirka_okna / 2, vyska_okna / 2)
+    mic_speed_x = 8 * (-1 if mic_speed_x > 0 else 1)
+    mic_speed_y = 8 * (-1 if mic_speed_y > 0 else 1)
+Herní Rozhraní
+Menu
+Funkce zobraz_menu():
 
-zobraz_menu(): Zobrazuje hlavní menu hry s různými možnostmi
-zobraz_historii(): Zobrazuje historii zápasů z databáze
-zobraz_aktivni_efekty(): Zobrazuje aktuálně aktivní power-upy a jejich zbývající čas
+Dynamické zobrazení herních možností
+Přepínání herních módů
+Ovládání nastavení hry
 
-Herní objekty
+Historie Zápasů
+Funkce zobraz_historii():
 
-Vytvoření herních objektů: míč, pálky hráčů, CPU, středová platforma
-Nastavení jejich počátečních pozic a velikostí
+Načítání posledních 5 záznamů z databáze
+Možnost smazání historie
+Zobrazení výsledků v menu
 
-Hlavní herní smyčka
+Hlavní Herní Smyčka
+Nekonečný herní cyklus (while True):
 
-Zpracování vstupu od uživatele podle herního režimu
-Aktualizace pozic všech objektů
-Generování nových power-upů v nastaveném intervalu
-Vykreslení všech objektů a skóre
-Kontrola konce hry (při dosažení 5 bodů) a zápis výsledku do databáze
+Zpracování herních stavů (menu, hra, historie)
+Generování power-upů
+Aktualizace herních objektů
+Vykreslování grafiky
+Kontrola ukončení hry
 
-Herní režimy
+Klíčové Návrhové Vzory
 
-cpu: Hra jednoho hráče proti počítači
-hrac: Hra dvou hráčů proti sobě
-historie: Zobrazení historie zápasů
+Stavový stroj pro herní stavy
+Objektový návrh pro power-upy
+Oddělení logiky vykreslování a herní logiky
+Použití callback funkcí pro herní mechaniky
 
-Funkce pro zrychlování
+Technické Detaily
 
-Volitelný režim, kdy se míč a pálky postupně zrychlují po každé kolizi
-Ovládáno globální proměnnou accelerate_ball a faktorem speed_multiplier
-
-Ovládání
-
-První hráč: šipky nahoru/dolů
-Druhý hráč: klávesy W/S
-Volba menu: číselné klávesy 1-4
+60 FPS herní smyčka
+Oddělení herních módů
+Dynamické řízení herních objektů
+Databázové ukládání výsledků
